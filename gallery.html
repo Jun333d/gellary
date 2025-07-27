@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lightbox2 -->
+  <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background-color: #f7f7f7;
+    }
+
+    header {
+      background-color: #0077cc;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .gallery {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .gallery a:hover img {
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Image Gallery</h1>
+    <p>Auto-loaded from ImageKit folder: <code>/images</code></p>
+  </header>
+
+  <div class="gallery" id="gallery"></div>
+
+  <script>
+    const publicKey = "public_ATtIpZisVpt6iNnrVhAPW97KFXI=";
+    const apiEndpoint = "https://api.imagekit.io/v1/files?path=%2Fimages&sort=DESC_CREATED"; // %2Fimages = /images folder
+
+    fetch(apiEndpoint, {
+      headers: {
+        Authorization: "Basic " + btoa(publicKey + ":")
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("gallery");
+      data.forEach(file => {
+        if (file.type === "file") {
+          const link = document.createElement("a");
+          link.href = file.url;
+          link.setAttribute("data-lightbox", "gallery");
+          link.setAttribute("data-title", file.name);
+
+          const img = document.createElement("img");
+          img.src = file.url;
+          img.alt = file.name;
+
+          link.appendChild(img);
+          container.appendChild(link);
+        }
+      });
+    })
+    .catch(err => {
+      console.error("Error loading images:", err);
+    });
+  </script>
+</body>
+</html>
