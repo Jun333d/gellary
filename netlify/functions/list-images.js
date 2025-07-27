@@ -1,26 +1,26 @@
-import ImageKit from "imagekit";
+const fetch = require("node-fetch");
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: "https://ik.imagekit.io/m1x4g4l6m/"
-});
+exports.handler = async function (event, context) {
+  const privateApiKey = "your_private_api_key_here"; // Keep this secret!
+  const folder = "images"; // Your ImageKit folder
 
-export const handler = async () => {
-  try {
-    const result = await imagekit.listFiles({
-      path: "images/",
-      sort: "DESC_CREATED"
-    });
+  const response = await fetch(`https://api.imagekit.io/v1/files?path=${folder}`, {
+    headers: {
+      Authorization: "Basic " + Buffer.from(privateApiKey + ":").toString("base64"),
+    },
+  });
 
+  if (!response.ok) {
     return {
-      statusCode: 200,
-      body: JSON.stringify(result)
-    };
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      statusCode: response.status,
+      body: JSON.stringify({ error: "Failed to fetch images" }),
     };
   }
+
+  const data = await response.json();
+  return {
+    statusCode: 200,
+    body: JSON.stringify(data),
+  };
 };
+
