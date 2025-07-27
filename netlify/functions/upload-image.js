@@ -1,41 +1,29 @@
-// /netlify/functions/upload-image.js
+import ImageKit from "imagekit";
 
-import fetch from 'node-fetch';
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: "https://ik.imagekit.io/m1x4g4l6m"
+});
 
-export const handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
-
-  const { file, fileName } = JSON.parse(event.body);
-
-  const folder = "images";
-  const API_KEY = process.env.IMAGEKIT_PRIVATE_KEY;
-
-  const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-    method: "POST",
-    headers: {
-      Authorization: "Basic " + Buffer.from(`${API_KEY}:`).toString("base64"),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      file,
+export const handler = async ({ body }) => {
+  try {
+    const { fileName, fileData } = JSON.parse(body);
+    // fileData should be a base64 string without data mime prefix
+    const uploadResult = await imagekit.upload({
+      file: fileData,
       fileName,
-      folder,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
+      folder: "/images"
+    });
     return {
-      statusCode: res.status,
-      body: JSON.stringify({ error: data.message || "Upload failed" }),
+      statusCode: 200,
+      body: JSON.stringify(uploadResult)
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
     };
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(data),
-  };
 };
