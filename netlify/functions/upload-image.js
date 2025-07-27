@@ -7,23 +7,30 @@ const imagekit = new ImageKit({
 });
 
 export const handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed"
+    };
+  }
+
   try {
     const { fileName, fileData } = JSON.parse(event.body);
 
-    const result = await imagekit.upload({
-      file: fileData,
+    const uploadResponse = await imagekit.upload({
+      file: fileData, // base64 string
       fileName,
       folder: "/images"
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify(result)
+      body: JSON.stringify(uploadResponse)
     };
-  } catch (err) {
+  } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
