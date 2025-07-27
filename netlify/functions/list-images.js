@@ -1,25 +1,26 @@
-// /netlify/functions/list-images.js
+import ImageKit from "imagekit";
 
-export async function handler() {
-  const API_KEY = process.env.IMAGEKIT_PRIVATE_KEY;
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: "https://ik.imagekit.io/m1x4g4l6m/"
+});
 
-  const res = await fetch("https://api.imagekit.io/v1/files?path=%2Fimages", {
-    headers: {
-      Authorization: "Basic " + Buffer.from(`${API_KEY}:`).toString("base64"),
-    },
-  });
+export const handler = async () => {
+  try {
+    const result = await imagekit.listFiles({
+      path: "images/",
+      sort: "DESC_CREATED"
+    });
 
-  if (!res.ok) {
     return {
-      statusCode: res.status,
-      body: JSON.stringify({ error: "Failed to fetch images." }),
+      statusCode: 200,
+      body: JSON.stringify(result)
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
     };
   }
-
-  const data = await res.json();
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  };
-}
+};
