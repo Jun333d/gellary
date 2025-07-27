@@ -53,39 +53,30 @@
     <p>Auto-loaded from ImageKit folder: <code>/images</code></p>
   </header>
 
-  <div class="gallery" id="gallery"></div>
+ <div class="gallery" id="gallery"></div>
 
-  <script>
-    const publicKey = "public_ATtIpZisVpt6iNnrVhAPW97KFXI=";
-    const apiEndpoint = "https://api.imagekit.io/v1/files?path=%2Fimages&sort=DESC_CREATED"; // %2Fimages = /images folder
-
-    fetch(apiEndpoint, {
-      headers: {
-        Authorization: "Basic " + btoa(publicKey + ":")
-      }
-    })
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("gallery");
-      data.forEach(file => {
+<script>
+  fetch("/.netlify/functions/list-images")
+    .then((res) => res.json())
+    .then((files) => {
+      const gallery = document.getElementById("gallery");
+      files.forEach((file) => {
         if (file.type === "file") {
-          const link = document.createElement("a");
-          link.href = file.url;
-          link.setAttribute("data-lightbox", "gallery");
-          link.setAttribute("data-title", file.name);
-
           const img = document.createElement("img");
           img.src = file.url;
           img.alt = file.name;
-
-          link.appendChild(img);
-          container.appendChild(link);
+          img.style.width = "100%";
+          img.style.borderRadius = "12px";
+          img.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
+          img.style.objectFit = "cover";
+          gallery.appendChild(img);
         }
       });
     })
-    .catch(err => {
-      console.error("Error loading images:", err);
+    .catch((err) => {
+      console.error("Failed to load images:", err);
     });
-  </script>
+</script>
+
 </body>
 </html>
