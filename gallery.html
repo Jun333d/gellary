@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Masonry Gallery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 60px 0 30px;
+      font-weight: normal;
+    }
+
+    a.back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      text-decoration: none;
+      color: #0af;
+      background: rgba(255,255,255,0.05);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 10;
+    }
+
+    button.toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      z-index: 10;
+      transition: transform 0.2s ease, color 0.3s ease;
+      line-height: 1;
+      padding: 6px;
+    }
+
+    .toggle-btn:hover {
+      transform: scale(1.3);
+      color: #0af;
+    }
+
+    .masonry {
+      column-gap: 10px;
+    }
+
+    .masonry img {
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: block;
+      break-inside: avoid;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .masonry img:hover {
+      transform: scale(1.03);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .lightbox .close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      font-size: 40px;
+      color: white;
+      cursor: pointer;
+    }
+
+
+
+    .player{
+        position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      z-index: 10;
+      transition: transform 0.2s ease, color 0.3s ease;
+      line-height: 1;
+      padding: 6px;
+      height: 25px;
+      width: 25px;
+}
+  </style>
+</head>
+<body>
+
+<img src="1178863.png" id="icon" alt="player" class="player">
+<audio id="mySong">
+<source src="Joe Hisaishi - Merry-Go-Round of Life (from Howls Moving Castle).mp3" type="audio/mp3">
+</audio>
+  <a href="index.html" class="back-btn">← Back</a>
+  <button class="toggle-btn" onclick="cycleColumns()" title="Change layout">🧱</button>
+
+  <h1>Masonry Image Gallery</h1>
+  <div class="masonry" id="gallery"></div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox">
+    <span class="close">&times;</span>
+    <img id="lightbox-img" src="" alt="Zoomed image" />
+  </div>
+
+  <script>
+    const masonry = document.getElementById("gallery");
+    const breakpoints = [
+      { mobile: 2, desktop: 4 },
+      { mobile: 3, desktop: 6 },
+      { mobile: 4, desktop: 8 },
+    ];
+    let layoutIndex = 0;
+
+    function applyColumnCount() {
+      const isMobile = window.innerWidth < 768;
+      const count = isMobile ? breakpoints[layoutIndex].mobile : breakpoints[layoutIndex].desktop;
+      masonry.style.columnCount = count;
+    }
+
+    function cycleColumns() {
+      layoutIndex = (layoutIndex + 1) % breakpoints.length;
+      applyColumnCount();
+    }
+
+    window.addEventListener("resize", applyColumnCount);
+
+    fetch("links.txt")
+      .then(res => res.text())
+      .then(text => {
+        const urls = text.trim().split("\n");
+        urls.forEach(url => {
+          const img = document.createElement("img");
+          img.src = url.trim();
+          img.alt = "Image";
+          img.onclick = () => openLightbox(url.trim());
+          masonry.appendChild(img);
+        });
+        applyColumnCount(); // apply after loading
+      });
+
+    // Lightbox Logic
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+
+    function openLightbox(src) {
+      lightboxImg.src = src;
+      lightbox.style.display = "flex";
+    }
+
+    document.querySelector(".close").onclick = () => {
+      lightbox.style.display = "none";
+    };
+
+    lightbox.onclick = (e) => {
+      if (e.target === lightbox) {
+        lightbox.style.display = "none";
+      }
+    };
+
+    var mySong = document.getElementById("mySong"); 
+var icon = document.getElementById ("icon");
+
+icon.onclick = function(){ 
+    if(mySong.paused){ 
+        mySong.play();
+        icon.src = "pause.webp";
+       }else{
+        mySong.pause();
+        icon.src = "1178863.png";
+}
+}
+  </script>
+</body>
+</html>

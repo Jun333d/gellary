@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+.player{
+        position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      z-index: 10;
+      transition: transform 0.2s ease, color 0.3s ease;
+      line-height: 1;
+      padding: 6px;
+      height: 25px;
+      width: 25px;
+}
+</style>
+</head>
+<body>
+<img src="1178863.png" id="icon" alt="player" class="player">
+<audio id="mySong">
+<source src="Joe Hisaishi - Merry-Go-Round of Life (from Howls Moving Castle).mp3" type="audio/mp3">
+</audio>
+</body>
+<script>
+var mySong = document.getElementById("mySong"); 
+var icon = document.getElementById ("icon");
+
+icon.onclick = function(){ 
+    if(mySong.paused){ 
+        mySong.play();
+        icon.src = "pause.webp";
+       }else{
+        mySong.pause();
+        icon.src = "1178863.png";
+}
+}
+</script>
+</html>
