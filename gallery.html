@@ -124,6 +124,17 @@
       height: 25px;
       width: 25px;
 }
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -143,6 +154,40 @@
     <span class="close">&times;</span>
     <img id="lightbox-img" src="" alt="Zoomed image" />
   </div>
+<script>
+  async function loadImagesInOrder() {
+    const res = await fetch("links.txt");
+    const text = await res.text();
+    const urls = text.trim().split("\n");
+
+    masonry.innerHTML = ""; // clear any placeholders
+
+    for (let url of urls) {
+      await addImage(url.trim());
+    }
+
+    applyColumnCount(); // apply once after all loaded
+  }
+
+  function addImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = src;
+      img.alt = "Image";
+      img.classList.add("fade-in");
+
+      img.onload = () => {
+        img.onclick = () => openLightbox(src);
+        masonry.appendChild(img);
+        resolve();
+      };
+
+      img.onerror = resolve; // skip broken images
+    });
+  }
+
+  loadImagesInOrder();
+</script>
 
   <script>
     const masonry = document.getElementById("gallery");
@@ -166,19 +211,12 @@
 
     window.addEventListener("resize", applyColumnCount);
 
-    fetch("links.txt")
-      .then(res => res.text())
-      .then(text => {
-        const urls = text.trim().split("\n");
-        urls.forEach(url => {
-          const img = document.createElement("img");
-          img.src = url.trim();
-          img.alt = "Image";
-          img.onclick = () => openLightbox(url.trim());
-          masonry.appendChild(img);
-        });
-        applyColumnCount(); // apply after loading
-      });
+    // Add loader spinner
+const loader = document.createElement("div");
+loader.innerText = "Loading images...";
+loader.style.textAlign = "center";
+loader.style.padding = "30px";
+masonry.appendChild(loader);
 
     // Lightbox Logic
     const lightbox = document.getElementById("lightbox");
