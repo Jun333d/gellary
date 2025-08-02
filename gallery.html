@@ -154,42 +154,38 @@
     <span class="close">&times;</span>
     <img id="lightbox-img" src="" alt="Zoomed image" />
   </div>
-<script>
-  async function loadImagesInOrder() {
-    const res = await fetch("links.txt");
-    const text = await res.text();
-    const urls = text.trim().split("\n");
-
-    masonry.innerHTML = ""; // clear any placeholders
-
-    for (let url of urls) {
-      await addImage(url.trim());
-    }
-
-    applyColumnCount(); // apply once after all loaded
-  }
-
-  function addImage(src) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = src;
-      img.alt = "Image";
-      img.classList.add("fade-in");
-
-      img.onload = () => {
-        img.onclick = () => openLightbox(src);
-        masonry.appendChild(img);
-        resolve();
-      };
-
-      img.onerror = resolve; // skip broken images
-    });
-  }
-
-  loadImagesInOrder();
-</script>
 
   <script>
+    const loader = document.createElement("div");
+loader.innerText = "Loading images...";
+loader.style.textAlign = "center";
+loader.style.padding = "30px";
+masonry.appendChild(loader);
+
+fetch("links.txt")
+  .then(res => res.text())
+  .then(text => {
+    const urls = text.trim().split("\n");
+    masonry.innerHTML = ""; // Remove loader
+    loadImagesSequentially(urls, 0);
+  });
+
+function loadImagesSequentially(urls, index) {
+  if (index >= urls.length) return;
+
+  const img = new Image();
+  img.src = urls[index].trim();
+  img.alt = "Image";
+  img.classList.add("fade-in");
+
+  img.onload = () => {
+    img.onclick = () => openLightbox(img.src);
+    masonry.appendChild(img);
+    applyColumnCount();
+    loadImagesSequentially(urls, index + 1); // Load next after current is done
+  };
+}
+
     const masonry = document.getElementById("gallery");
     const breakpoints = [
       { mobile: 2, desktop: 4 },
@@ -252,3 +248,4 @@ icon.onclick = function(){
   </script>
 </body>
 </html>
+
