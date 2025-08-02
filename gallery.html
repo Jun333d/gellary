@@ -124,20 +124,28 @@
       height: 25px;
       width: 25px;
 }
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 0.6s ease forwards;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
   </style>
 </head>
 <body>
+<!-- Add this inside <body>, at the top -->
+<div id="loader" style="
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: sans-serif;
+  color: #fff;
+">
+  <div style="width: 80%; height: 4px; background: #444; border-radius: 2px; overflow: hidden;">
+    <div id="loading-bar" style="height: 100%; width: 0%; background: #0af; transition: width 0.2s;"></div>
+  </div>
+  <p id="loading-text" style="margin-top: 12px;">Loading images...</p>
+</div>
 
 <img src="1178863.png" id="icon" alt="player" class="player">
 <audio id="mySong">
@@ -156,36 +164,6 @@
   </div>
 
   <script>
-    const loader = document.createElement("div");
-loader.innerText = "Loading images...";
-loader.style.textAlign = "center";
-loader.style.padding = "30px";
-masonry.appendChild(loader);
-
-fetch("links.txt")
-  .then(res => res.text())
-  .then(text => {
-    const urls = text.trim().split("\n");
-    masonry.innerHTML = ""; // Remove loader
-    loadImagesSequentially(urls, 0);
-  });
-
-function loadImagesSequentially(urls, index) {
-  if (index >= urls.length) return;
-
-  const img = new Image();
-  img.src = urls[index].trim();
-  img.alt = "Image";
-  img.classList.add("fade-in");
-
-  img.onload = () => {
-    img.onclick = () => openLightbox(img.src);
-    masonry.appendChild(img);
-    applyColumnCount();
-    loadImagesSequentially(urls, index + 1); // Load next after current is done
-  };
-}
-
     const masonry = document.getElementById("gallery");
     const breakpoints = [
       { mobile: 2, desktop: 4 },
@@ -207,12 +185,39 @@ function loadImagesSequentially(urls, index) {
 
     window.addEventListener("resize", applyColumnCount);
 
-    // Add loader spinner
-const loader = document.createElement("div");
-loader.innerText = "Loading images...";
-loader.style.textAlign = "center";
-loader.style.padding = "30px";
-masonry.appendChild(loader);
+    fetch("links.txt")
+  .then(res => res.text())
+  .then(text => {
+    const urls = text.trim().split("\n");
+    const total = urls.length;
+    let loaded = 0;
+
+    urls.forEach(url => {
+      const img = new Image();
+      img.src = url.trim();
+      img.alt = "Image";
+      img.onclick = () => openLightbox(url.trim());
+      img.onload = () => {
+        loaded++;
+        const progress = (loaded / total) * 100;
+        document.getElementById("loading-bar").style.width = progress + "%";
+
+        if (loaded === total) {
+          document.getElementById("loader").style.display = "none";
+          applyColumnCount(); // apply after loading
+        }
+      };
+      img.onerror = () => {
+        loaded++;
+        if (loaded === total) {
+          document.getElementById("loader").style.display = "none";
+          applyColumnCount();
+        }
+      };
+      masonry.appendChild(img);
+    });
+  });
+
 
     // Lightbox Logic
     const lightbox = document.getElementById("lightbox");
@@ -248,4 +253,3 @@ icon.onclick = function(){
   </script>
 </body>
 </html>
-
